@@ -1,5 +1,6 @@
 import logging
 import json
+import os
 import random
 import string
 import requests
@@ -11,9 +12,9 @@ from telegram.ext import (
 )
 
 # ============================================
-# ⚙️ CONFIGURATION - METS TON TOKEN ICI
+# ⚙️ CONFIGURATION - TOKEN VIA VARIABLE ENVIRONNEMENT
 # ============================================
-BOT_TOKEN = "8823047979:AAGzzGGNYUaH5-o400m0Zx4ozvxjwgvIFxo"
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "8823047979:AAGzzGGNYUaH5-o400m0Zx4ozvxjwgvIFxo")
 
 # ============================================
 # 📝 LOGGING
