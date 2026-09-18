@@ -4,7 +4,10 @@ import os
 import random
 import string
 import requests
+import asyncio
 from datetime import datetime
+from threading import Thread
+from flask import Flask
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application, CommandHandler, CallbackQueryHandler,
@@ -12,9 +15,26 @@ from telegram.ext import (
 )
 
 # ============================================
-# ⚙️ CONFIGURATION - TOKEN VIA VARIABLE ENVIRONNEMENT
+# ⚙️ CONFIGURATION
 # ============================================
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "8823047979:AAGzzGGNYUaH5-o400m0Zx4ozvxjwgvIFxo")
+PORT = int(os.environ.get("PORT", 8080))
+
+# ============================================
+# 🌐 PETIT SERVEUR WEB POUR RAILWAY
+# ============================================
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "🤖 ProBot est en ligne !", 200
+
+@app.route('/health')
+def health():
+    return "OK", 200
+
+def run_flask():
+    app.run(host='0.0.0.0', port=PORT)
 
 # ============================================
 # 📝 LOGGING
@@ -26,7 +46,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ============================================
-# 💾 BASE DE DONNÉES (fichier JSON)
+# 💾 BASE DE DONNÉES
 # ============================================
 DATA_FILE = "users.json"
 
@@ -317,32 +337,33 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logger.warning(f'Error: {context.error}')
 
 # ============================================
-# 🏁 MAIN - LANCEMENT DU BOT
+# 🏁 MAIN
 # ============================================
 def main():
     print("🤖 ProBot démarre...")
 
-    app = Application.builder().token(BOT_TOKEN).build()
+    # Lancer le serveur web dans un thread séparé
+    flask_thread = Thread(target=run_flask, daemon=True)
+    flask_thread.start()
+    print(f"🌐 Serveur web démarré sur le port {PORT}")
 
-    # Commandes
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("calc", calc))
-    app.add_handler(CommandHandler("crypto", crypto))
-    app.add_handler(CommandHandler("weather", weather))
-    app.add_handler(CommandHandler("quiz", quiz))
-    app.add_handler(CommandHandler("rps", rps))
-    app.add_handler(CommandHandler("password", password))
-    app.add_handler(CommandHandler("quote", quote))
+    # Lancer le bot Telegram
+    app_bot = Application.builder().token(BOT_TOKEN).build()
 
-    # Boutons inline
-    app.add_handler(CallbackQueryHandler(button_handler))
-
-    # Erreurs
-    app.add_error_handler(error_handler)
+    app_bot.add_handler(CommandHandler("start", start))
+    app_bot.add_handler(CommandHandler("calc", calc))
+    app_bot.add_handler(CommandHandler("crypto", crypto))
+    app_bot.add_handler(CommandHandler("weather", weather))
+    app_bot.add_handler(CommandHandler("quiz", quiz))
+    app_bot.add_handler(CommandHandler("rps", rps))
+    app_bot.add_handler(CommandHandler("password", password))
+    app_bot.add_handler(CommandHandler("quote", quote))
+    app_bot.add_handler(CallbackQueryHandler(button_handler))
+    app_bot.add_error_handler(error_handler)
 
     print("✅ ProBot est EN LIGNE!")
     print("📱 Ouvre Telegram et cherche ton bot!")
-    app.run_polling()
+    app_bot.run_polling()
 
 if __name__ == "__main__":
     main()
