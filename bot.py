@@ -17,7 +17,7 @@ from telegram.ext import (
 # ============================================
 # CONFIGURATION
 # ============================================
-BOT_TOKEN = os.environ.get("BOT_TOKEN", "8823047979:AAGzzGGNYUaH5-o400m0Zx4ozvxjwgvIFxo")
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "8823047979:AAG8yQlwSArLcsbxLsujBEXq2WXm6VIpIks")
 PORT = int(os.environ.get("PORT", 8080))
 
 # ============================================
